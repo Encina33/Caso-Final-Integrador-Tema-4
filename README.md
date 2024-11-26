@@ -1,4 +1,132 @@
 # Caso-Final-Integrador-Tema-3
+
+
+# Análisis de Errores y Correcciones del Código
+
+Este documento detalla los errores identificados en los archivos `.cpp` y `.h` del proyecto, así como las sugerencias para corregirlos. El objetivo es mejorar la calidad, robustez y claridad del código.
+
+---
+
+## Errores en el archivo `.cpp`
+
+### 1. **Fuga de memoria en `ConsoleBox`**
+- **Problema:** La instancia global de `ConsoleBox` (`consoleBox`) se crea dinámicamente con `new`, pero nunca se libera.
+- **Solución:** Usa un `std::unique_ptr` o crea el objeto de forma estática para que su ciclo de vida esté controlado automáticamente.
+
+### 2. **Nombre de función incorrecto**
+- **Problema:** La función implementada como `void cargarscrip()` no coincide con la declaración en el `.h` (`void cargarscrip();`).
+- **Solución:** Cambia el nombre en el `.cpp` o en el `.h` para que sean consistentes.
+
+### 3. **Manejo incompleto de errores en archivos**
+- **Problema:** Si ocurre un error después de abrir el archivo, el puntero no se libera correctamente.
+- **Solución:** Usa RAII para manejar archivos o asegúrate de llamar a `fclose` en todos los caminos posibles (por ejemplo, con un `finally` simulado).
+
+### 4. **Tipo incorrecto en `fread`**
+- **Problema:** La variable `c` usa el tipo `int` para almacenar el resultado de `fread`, lo que puede ser inconsistente en algunas plataformas.
+- **Solución:** Cambia el tipo de `c` a `size_t`, que es el tipo devuelto por `fread`.
+
+### 5. **Falta de restablecimiento de colores**
+- **Problema:** Después de imprimir texto con colores (`fg_blue` y `bg_white`), no se restablecen los colores predeterminados de la consola.
+- **Solución:** Agrega un código ANSI para restablecer los colores (`\033[0m`) después de imprimir.
+
+### 6. **Errores genéricos en `fopen`**
+- **Problema:** Cuando `fopen` falla, se imprime un mensaje genérico sin información detallada.
+- **Solución:** Usa `perror` para imprimir detalles específicos del error del sistema.
+
+---
+
+## Errores en el archivo `.h`
+
+### 1. **Incompatibilidad de nombres**
+- **Problema:** El nombre de la función `cargarscrip` en el `.h` no coincide con el nombre en el `.cpp`.
+- **Solución:** Asegúrate de que las declaraciones y definiciones sean consistentes.
+
+### 2. **Uso de `using namespace std`**
+- **Problema:** Incluir `using namespace std` en un archivo de encabezado puede causar conflictos de nombres en otros archivos.
+- **Solución:** Elimina `using namespace std` y usa prefijos explícitos como `std::string`.
+
+### 3. **Visibilidad global no encapsulada**
+- **Problema:** Todas las variables y funciones están expuestas globalmente.
+- **Solución:** Usa un `namespace` para encapsular las estructuras y funciones, evitando conflictos de nombres.
+
+### 4. **Falta de destructores**
+- **Problema:** `ConsoleBox` no tiene destructor, lo que puede ser problemático si en el futuro se añaden recursos dinámicos.
+- **Solución:** Agrega un destructor explícito o documenta que no es necesario porque no se usan recursos dinámicos.
+
+### 5. **Definición de constantes como punteros**
+- **Problema:** Las constantes en `ColorConsole` son punteros (`const char*`), lo cual puede ser confuso.
+- **Solución:** Usa `constexpr const char*` para garantizar que sean constantes verdaderas.
+
+### 6. **Parámetros predeterminados en sobrecarga**
+- **Problema:** La función `cargarscrip` tiene parámetros predeterminados, lo que puede causar ambigüedades con la sobrecarga.
+- **Solución:** Elimina los valores predeterminados en el encabezado.
+
+---
+
+## Cambios propuestos
+
+### Cambios en `.cpp`
+1. **Liberar memoria de `consoleBox`:**
+   ```cpp
+   ConsoleBox consoleBoxInstance;
+   ConsoleBox* consoleBox = &consoleBoxInstance;
+Restablecer colores al imprimir:
+
+cpp
+Copiar código
+cout << script << "\033[0m" << endl;
+Manejo robusto de archivos:
+
+cpp
+Copiar código
+FILE* f = fopen(filename, "rb");
+if (!f) {
+    perror("Error al abrir el archivo");
+    return;
+}
+Usar size_t para fread:
+
+cpp
+Copiar código
+size_t c;
+Cambios en .h
+Eliminar using namespace std: Usa prefijos explícitos en lugar de:
+
+cpp
+Copiar código
+string
+Cambia a:
+
+cpp
+Copiar código
+std::string
+Encapsular todo en un namespace:
+
+cpp
+Copiar código
+namespace TinyLisp {
+    struct ColorConsole { ... };
+    struct ConsoleBox { ... };
+    extern ConsoleBox* consoleBox;
+    void cargarscrip(const char* filename, bool show_script = false);
+    void cargarscrip();
+}
+Resumen
+Cambios recomendados
+Liberar recursos dinámicos: Evita fugas de memoria.
+Encapsular nombres: Usa namespace para prevenir conflictos.
+Usar RAII: Asegura la correcta liberación de recursos.
+Manejo robusto de errores: Proporciona mensajes de error más detallados.
+Consistencia en nombres: Mantén coherencia entre declaraciones y definiciones.
+Estos cambios mejorarán la claridad, robustez y mantenibilidad del código.
+
+
+
+----
+
+
+
+
 ## Trabajos prácticos
 ### 1. Carga de scripts en tiny-lisp
 El módulo Labmain.cpp define la función load_script(), que se utiliza para cargar un script en la memoria y aplicarle la coloración sintáctica. Esta función se basa en la librería estándar de C.
