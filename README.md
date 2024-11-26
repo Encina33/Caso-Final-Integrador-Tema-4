@@ -33,6 +33,7 @@ Este documento detalla los errores identificados en los archivos `.cpp` y `.h` d
 - **Problema:** Cuando `fopen` falla, se imprime un mensaje genérico sin información detallada.
 - **Solución:** Usa `perror` para imprimir detalles específicos del error del sistema.
 
+
 ---
 
 ## Errores en el archivo `.h`
@@ -120,7 +121,7 @@ Manejo robusto de errores: Proporciona mensajes de error más detallados.
 Consistencia en nombres: Mantén coherencia entre declaraciones y definiciones.
 Estos cambios mejorarán la claridad, robustez y mantenibilidad del código.
 
-
+  #Correción de Encina
 
 ----
 
